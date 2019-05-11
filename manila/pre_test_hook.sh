@@ -34,7 +34,7 @@ MANILA_CEPH_DRIVER=$2
 MANILA_CEPH_DRIVER=${MANILA_CEPH_DRIVER:-cephfsnative}
 
 # Third argument specifies the type of backend configuration. It can either be
-# 'singlebackend' or 'multiplebackend'.
+# 'singlebackend' or 'multibackend'.
 MANILA_BACKEND_TYPE=$3
 MANILA_BACKEND_TYPE=${MANILA_BACKEND_TYPE:-singlebackend}
 

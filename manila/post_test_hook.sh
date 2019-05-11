@@ -30,12 +30,12 @@ export TEMPEST_CONFIG=$BASE/new/tempest/etc/tempest.conf
 # Handle the relevant ones.
 
 # First argument is the type of backend configuration that is setup. It can
-# either be 'singlebackend' or 'multiplebackend'.
+# either be 'singlebackend' or 'multibackend'.
 MANILA_BACKEND_TYPE=$1
 MANILA_BACKEND_TYPE=${MANILA_BACKEND_TYPE:-singlebackend}
 
-# Second argument is the type of the cephfs driver that is setup. Currently,
-# 'cephfsnative' is the only possibility.
+# Second argument is the type of the cephfs driver that is setup. Valid
+# values are "cephfsnative" and "cephfsnfs"
 MANILA_CEPH_DRIVER=$2
 MANILA_CEPH_DRIVER=${MANILA_CEPH_DRIVER:-cephfsnative}
 
@@ -87,7 +87,7 @@ fi
 iniset $TEMPEST_CONFIG share share_creation_retry_number 2
 
 # Suppress errors in cleanup of resources.
-SUPPRESS_ERRORS=${SUPPRESS_ERRORS_IN_CLEANUP:-True}
+SUPPRESS_ERRORS=${SUPPRESS_ERRORS_IN_CLEANUP:-False}
 iniset $TEMPEST_CONFIG share suppress_errors_in_cleanup $SUPPRESS_ERRORS
 
 
@@ -109,42 +109,15 @@ iniset $TEMPEST_CONFIG share run_shrink_tests $RUN_MANILA_SHRINK_TESTS
 # Disable multi_tenancy tests.
 iniset $TEMPEST_CONFIG share multitenancy_enabled False
 
-# CephFS does not yet suppport cloning of snapshots required to create Manila
+# CephFS does not yet support cloning of snapshots required to create Manila
 # shares from snapshots.
 # Disable snapshot tests
 RUN_MANILA_SNAPSHOT_TESTS=${RUN_MANILA_SNAPSHOT_TESTS:-False}
 iniset $TEMPEST_CONFIG share run_snapshot_tests $RUN_MANILA_SNAPSHOT_TESTS
 
-# Disable consistency group tests. The lone cephfs driver, cephfs native,
-# does not yet (2nd Feb, 2016)  support,
-# 'create_consistency_group_from_snapshot' API.
-RUN_MANILA_CG_TESTS=${RUN_MANILA_CG_TESTS:-False}
-iniset $TEMPEST_CONFIG share run_consistency_group_tests $RUN_MANILA_CG_TESTS
-
 # Let us control if we die or not.
 set +o errexit
 cd $BASE/new/tempest
-
-
-# Workaround for Tempest architectural changes
-# See bugs:
-# 1) https://bugs.launchpad.net/manila/+bug/1531049
-# 2) https://bugs.launchpad.net/tempest/+bug/1524717
-ADMIN_TENANT_NAME=${ADMIN_TENANT_NAME:-"admin"}
-ADMIN_PASSWORD=${ADMIN_PASSWORD:-"secretadmin"}
-iniset $TEMPEST_CONFIG auth admin_username ${ADMIN_USERNAME:-"admin"}
-iniset $TEMPEST_CONFIG auth admin_password $ADMIN_PASSWORD
-iniset $TEMPEST_CONFIG auth admin_tenant_name $ADMIN_TENANT_NAME
-iniset $TEMPEST_CONFIG auth admin_domain_name ${ADMIN_DOMAIN_NAME:-"Default"}
-iniset $TEMPEST_CONFIG identity username ${TEMPEST_USERNAME:-"demo"}
-iniset $TEMPEST_CONFIG identity password $ADMIN_PASSWORD
-iniset $TEMPEST_CONFIG identity tenant_name ${TEMPEST_TENANT_NAME:-"demo"}
-iniset $TEMPEST_CONFIG identity alt_username ${ALT_USERNAME:-"alt_demo"}
-iniset $TEMPEST_CONFIG identity alt_password $ADMIN_PASSWORD
-iniset $TEMPEST_CONFIG identity alt_tenant_name ${ALT_TENANT_NAME:-"alt_demo"}
-iniset $TEMPEST_CONFIG validation ip_version_for_ssh 4
-iniset $TEMPEST_CONFIG validation ssh_timeout $BUILD_TIMEOUT
-iniset $TEMPEST_CONFIG validation network_for_ssh ${PRIVATE_NETWORK_NAME:-"private"}
 
 echo "Running tempest manila test suites"
 if [[ $MANILA_TEST_TYPE == 'api' ]]; then
