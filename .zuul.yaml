@@ -68,6 +68,14 @@
       Runs manila tempest plugin tests with Native CephFS as a manila back
       end (DHSS=False)
     parent: manila-tempest-plugin-cephfs-native
+    vars:
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            share:
+              capability_snapshot_support: False
+              capability_create_share_from_snapshot_support: False
+              run_snapshot_tests: False
 
 - job:
     name: devstack-plugin-ceph-cephfs-nfs
@@ -75,6 +83,14 @@
       Runs manila tempest plugin tests with CephFS via NFS-Ganesha as a manila
       back end (DHSS=False)
     parent: manila-tempest-plugin-cephfs-nfs
+    vars:
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            share:
+              capability_snapshot_support: False
+              capability_create_share_from_snapshot_support: False
+              run_snapshot_tests: False
 
 - job:
     name: devstack-plugin-ceph-tempest-fedora-latest
