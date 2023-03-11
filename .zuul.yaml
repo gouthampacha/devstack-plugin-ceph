@@ -88,11 +88,24 @@
     parent: manila-tempest-plugin-cephfs-native
 
 - job:
-    name: devstack-plugin-ceph-cephfs-nfs
+    name: devstack-plugin-ceph-cephfs-nfs-cs9
     description: |
       Runs manila tempest plugin tests with CephFS via NFS-Ganesha as a manila
       back end (DHSS=False)
     parent: manila-tempest-plugin-cephfs-nfs
+    nodeset: devstack-single-node-centos-9-stream
+    vars:
+      # NOTE(gouthamr): disable IPv6 scenario tests here till we figure out
+      # a replacement for zebra in centos-9-stream
+      tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
+      devstack_localrc:
+        MANILA_OPTGROUP_cephfsnfs_cephfs_ganesha_server_ip: "{{ hostvars[inventory_hostname]['nodepool']['private_ipv4'] }}"
+        CEPH_RELEASE: "quincy"
+        MANILA_SETUP_IPV6: false
+        NEUTRON_CREATE_INITIAL_NETWORKS: true
+        IP_VERSION: 4
+
+
 
 - job:
     name: devstack-plugin-ceph-tempest-fedora-latest
@@ -169,16 +182,12 @@
       Runs devstack-plugin-ceph-tempest jobs.
     check:
       jobs:
-        - devstack-plugin-ceph-tempest-py3:
-            voting: false
-        - devstack-plugin-ceph-tempest-cephadm:
-            voting: false
-        - devstack-plugin-ceph-cephfs-native:
-            irrelevant-files: *irrelevant-files
-            voting: false
-        # - devstack-plugin-ceph-cephfs-nfs:
-        #     irrelevant-files: *irrelevant-files
-        #     voting: false
+        #- devstack-plugin-ceph-tempest-py3:
+        #    voting: false
+        #- devstack-plugin-ceph-tempest-cephadm:
+        #    voting: false
+        #- devstack-plugin-ceph-cephfs-native
+        - devstack-plugin-ceph-cephfs-nfs-cs9
         # - devstack-plugin-ceph-tempest-fedora-latest
         # - devstack-plugin-ceph-multinode-tempest-py3
         # - devstack-plugin-ceph-multinode-tempest-cephadm:
